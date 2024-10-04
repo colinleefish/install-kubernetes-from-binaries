@@ -1,4 +1,4 @@
-# Installing K8s from Binaries
+# Install Kubernetes from Binaries
 
 This is a notebook I made while learning to install Kubernetes from binaries. I set up one Master and two Nodes. No scripts were used during the installation, and there's no HA setup.
 
