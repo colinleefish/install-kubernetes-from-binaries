@@ -4,7 +4,7 @@ Vagrant.configure("2") do |config|
       master.vm.box = "bento/rockylinux-8"
   
       # Set Host-Only Network
-      master.vm.network "private_network", type: "dhcp"
+      master.vm.network "private_network", ip: "192.168.56.10", netmask: "255.255.255.0"
   
       # Set NAT for internet access
       master.vm.network "public_network", type: "dhcp"
@@ -23,7 +23,7 @@ Vagrant.configure("2") do |config|
       node01.vm.box = "bento/rockylinux-8"
   
       # Set Host-Only Network
-      node01.vm.network "private_network", type: "dhcp"
+      node01.vm.network "private_network", ip: "192.168.56.11", netmask: "255.255.255.0"
   
       # Set NAT for internet access
       node01.vm.network "public_network", type: "dhcp"
@@ -42,7 +42,7 @@ Vagrant.configure("2") do |config|
       node02.vm.box = "bento/rockylinux-8"
   
       # Set Host-Only Network
-      node02.vm.network "private_network", type: "dhcp"
+      node02.vm.network "private_network", ip: "192.168.56.12", netmask: "255.255.255.0"
   
       # Set NAT for internet access
       node02.vm.network "public_network", type: "dhcp"
