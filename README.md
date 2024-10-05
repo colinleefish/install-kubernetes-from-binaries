@@ -8,6 +8,8 @@ Barring any surprises, this notebook will be updated twice a year.
 
 ## Notes
 
+Kubernetes version: v1.31.1
+
 This notebook is suitable for:
 
 - Developing an intuitive understanding of the various Kubernetes components
@@ -46,6 +48,8 @@ This notebook refers to the following materials:
 如无意外，这份笔记每年会更新两次。
 
 ## 说明
+
+安装的 K8s 版本：v1.31.1
 
 这个笔记适合：
 
