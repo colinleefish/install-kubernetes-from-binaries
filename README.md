@@ -14,27 +14,25 @@ Not suitable for:
 
 Barring any surprises, this notebook will be updated twice a year.
 
-
 ## Notes
 
 OS: Rocky Linux 8.10
 
 Component versions:
 
-|Components|Version|
-|----|----|
-|Kubernetes|v1.31.1|
-|etcd|v3.4.34|
-|containerd|v1.7.22|
-
+| Components | Version |
+| ---------- | ------- |
+| Kubernetes | v1.31.1 |
+| etcd       | v3.4.34 |
+| containerd | v1.7.22 |
 
 ## Steps
 
 1. Basic information and server preparation
 2. Kubernetes certificates
-3. Installing etcd and Master node
+3. Installing Master node
 4. Installing Worker nodes
-5. Understanding and setting up networking
+5. Setting up the network
 6. Starting a Pod
 
 ## References
@@ -43,9 +41,10 @@ This notebook refers to the following materials:
 
 - ["Kubernetes Authority Guide"](https://book.douban.com/subject/35458432/)
 - [kelseyhightower/kubernetes-the-hard-way](https://github.com/kelseyhightower/kubernetes-the-hard-way)
-## 
 
---------
+##
+
+---
 
 # 二进制安装 K8s
 
@@ -69,19 +68,19 @@ OS: Rocky Linux 8.10
 
 组件的版本:
 
-|组件|版本|
-|----|----|
-|Kubernetes|v1.31.1|
-|etcd|v3.4.34|
-|containerd|v1.7.22|
+| 组件       | 版本    |
+| ---------- | ------- |
+| Kubernetes | v1.31.1 |
+| etcd       | v3.4.34 |
+| containerd | v1.7.22 |
 
 ## 步骤
 
 1. 基本信息和服务器准备
 2. K8s 的证书
-3. 安装 etcd 和 Master 节点
+3. 安装 Master 节点
 4. 安装 Worker 节点
-5. 理解和设置网络
+5. 设置网络
 6. 启动一个 Pod
 
 ## 参考
@@ -90,4 +89,3 @@ OS: Rocky Linux 8.10
 
 - [《Kubernetes 权威指南》](https://book.douban.com/subject/35458432/)
 - [kelseyhightower/kubernetes-the-hard-way](https://github.com/kelseyhightower/kubernetes-the-hard-way)
-
