@@ -2,14 +2,6 @@
 
 This is a notebook I made while learning to install Kubernetes from binaries. I set up one Master and two Nodes. No scripts were used during the installation, and there's no HA setup.
 
-If Kubernetes were like a set of Lego bricks, I hope this notebook could serve as a simple (unofficial) manual.
-
-Barring any surprises, this notebook will be updated twice a year.
-
-## Notes
-
-Kubernetes version: v1.31.1
-
 This notebook is suitable for:
 
 - Developing an intuitive understanding of the various Kubernetes components
@@ -19,6 +11,22 @@ Not suitable for:
 
 - Deploying in a production environment
 - Learning advanced concepts
+
+Barring any surprises, this notebook will be updated twice a year.
+
+
+## Notes
+
+OS: Rocky Linux 8.10
+
+Component versions:
+
+|Components|Version|
+|----|----|
+|Kubernetes|v1.31.1|
+|etcd|v3.4.34|
+|containerd|v1.7.22|
+
 
 ## Steps
 
@@ -43,14 +51,6 @@ This notebook refers to the following materials:
 
 这是我在学习二进制安装 K8s 时候做的笔记，我装的是 1 个 Master 和 2 个 Node。安装的时候没用脚本，也没有 HA。
 
-如果 K8s 是个乐高拼图，希望这份笔记能当作一份极简的（非官方的）说明书。
-
-如无意外，这份笔记每年会更新两次。
-
-## 说明
-
-安装的 K8s 版本：v1.31.1
-
 这个笔记适合：
 
 - 用来培养自己对于 K8s 各个组件的感性理解
@@ -60,6 +60,20 @@ This notebook refers to the following materials:
 
 - 不适合用来部署生产环境
 - 学习一些比较进阶的概念
+
+如无意外，这份笔记每年会更新两次。
+
+## 说明
+
+OS: Rocky Linux 8.10
+
+组件的版本:
+
+|组件|版本|
+|----|----|
+|Kubernetes|v1.31.1|
+|etcd|v3.4.34|
+|containerd|v1.7.22|
 
 ## 步骤
 
