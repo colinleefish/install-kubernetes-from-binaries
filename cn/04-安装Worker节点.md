@@ -1,6 +1,6 @@
 # 安装 Worker 节点
 
-接下来我们安装 Worker 节点，主要是安装 `kubelet`，`kube-proxy`，容器的 Runtime，还有准备网络工具，也就是所谓的 CNI Plugins。
+接下来我们安装 Worker 节点，主要是安装 `kubelet`，容器的 Runtime，还有准备网络工具，也就是所谓的 CNI Plugins。
 
 这部分的操作要在两个 Node 服务器上分别执行。
 
@@ -151,9 +151,6 @@ resolvConf: "/etc/resolv.conf"
 runtimeRequestTimeout: "15m"
 
 podCIDR: "10.244.0.0/16"
-# WIP: 这两个后面再写
-# tlsCertFile: "/etc/kubernetes/pki/client.crt"
-# tlsPrivateKeyFile: "/etc/kubernetes/pki/client.key"
 ```
 
 准备 kubelet 的 Systemd service 文件 `/etc/systemd/system/kubelet.service`，请注意 --node-ip 的参数，这个地方要分别改为 Node 的主 IP，我们这个实验当中分别是 56.11 和 56.12。
