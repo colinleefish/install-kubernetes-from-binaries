@@ -35,7 +35,7 @@ Kubernetes 的二进制文件可以在这里下载：
 
 我们把 `kube-apiserver`，`kube-controller-manager`，`kube-scheduler` 和 `kubectl` 下载下来，也都放在 `/usr/local/bin` 里面。
 
-至此，在 `/usr/local/bin` 里面一共有 6 个文件。调整一下他们的权限。
+至此，在 `/usr/local/bin` 里面一共有 8 个文件（前一个章节还有 2 个 cfssl 的工具放在这里了）。调整一下他们的权限。
 
 ```bash
 chown root.root /usr/local/bin/*
@@ -205,9 +205,7 @@ WantedBy=multi-user.target
 
 ```ini
 KUBE_CONTROLLER_MANAGER_ARGS="--bind-address=192.168.56.10 \
---allocate-node-cidrs=true \
 --cluster-cidr=10.244.0.0/16 \
---node-cidr-mask-size=24 \
 --cluster-name=kubernetes \
 --cluster-signing-cert-file=/etc/kubernetes/pki/ca.pem \
 --cluster-signing-key-file=/etc/kubernetes/pki/ca-key.pem \
@@ -263,4 +261,3 @@ systemctl enable kube-scheduler
 ```
 
 接下来，我们[安装 Worker 节点](/cn/04-安装Worker节点.md)。
-
