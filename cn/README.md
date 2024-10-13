@@ -156,7 +156,7 @@ K8s 各个组件之间的交互都是通过 HTTPS 实现的：controller 访问 
 | :------------------- | ------------------ | --------------------------------------------------------- | ------------------------------------ |
 | CA                   | 所有               | <ul><li>ca-key.pem（Key）</li><li>ca.pem（证书）</li></ul>    | 根证书                               |
 | API Server 证书      | kube-apiserver     | <ul><li>apiserver-key.pem（Key）</li><li>apiserver.pem（证书）</li></ul> | API Server 的服务端证书              |
-| Client 证书          | 各种组件都会用     | <ul><li>client-key.pem（Key）</li><li>client.pem（证书）</li></ul>       | 用来表明自己身份的证书               |
+| Client 证书          | 各种组件都会用     | <ul><li>client-key.pem（Key）</li><li>client.pem（证书）</li></ul>       | 用来访问 API Server 的客户端证书               |
 | Service Account 证书 | kube-apiserver     | <ul><li>sa-key.pem（私钥）</li><li>sa-pub.pem（公钥）</li></ul>           | Service Account JWT Token 的签发证书 |
 
 > [!NOTE]  
