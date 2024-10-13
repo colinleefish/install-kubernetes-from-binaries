@@ -649,7 +649,8 @@ source ~/.bash_profile
 
 我们第一步安装 containerd。
 
-containerd 本身提供了一个非常好的安装说明：[https://github.com/containerd/containerd/blob/main/docs/getting-started.md](https://github.com/containerd/containerd/blob/main/docs/getting-started.md)
+> [!NOTE]
+> containerd 官方提供了一个非常好的[安装说明](https://github.com/containerd/containerd/blob/main/docs/getting-started.md)，推荐阅读。
 
 首先下载 containerd 的文件包，把里面东西都解压到 `/usr/local/bin`。
 
