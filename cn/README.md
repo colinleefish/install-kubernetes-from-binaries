@@ -235,7 +235,7 @@ cfssl genkey -initca ca-csr.json | cfssljson -bare ca
 
 在证书技术中，指定多个地址的方式叫做 Subject Alternative Names (SANs)，我们稍后会在证书的配置文件中添加这些 SAN 信息。
 
-复制下面的内容到 `apiserver-csr.json`。
+复制下面的内容到 `kube-apiserver-csr.json`。
 
 ```json
 {
