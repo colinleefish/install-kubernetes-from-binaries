@@ -1032,5 +1032,27 @@ FLANNELD_ARGS="-kube-subnet-mgr \
 -iface=eth1"
 ```
 
-这些配置参数当中 `NODE_NAME` 要根据具体的 node 进行修改，第一台就写 `node01`，第二台就写 `node02`。
+Flannel 可以独立运行，也可以作为 DaemonSet 以容器化方式运行。前者一般从 `etcd` 当中存储网络信息，后者一般通过 Kubernetes API 存储网络信息。但这里我们做了一些取巧：通过设置 NODE_NAME、kube-subnet-mgr、kubeconfig-file 等参数，让 flanneld 在独立运行的情况下也通过 Kubernetes API 存储网络信息。
 
+这些配置参数当中 `NODE_NAME` 要根据具体的 node 进行修改，第一台就写 `node01`，第二台就写 `node02`；另外 public-ip 也要做相应调整，分别改成主要用来互联的那个 IP。
+
+改完了 `flanneld` 的相关配置文件，我们还要去 `kube-controller-manager` 那边做一点调整。
+
+在第 5 篇，我们是自己在每台 Node 上面安排了网段：Node01 用 10.224.1.0/24，Node02 用 10.224.2.0/24，使用了 flannel 之后，给 Node 分配网段的任务就可以交给 K8四集群了。
+
+在 master 的 kube-controller-manager 启动配置中，添加一条参数
+
+```
+KUBE_CONTROLLER_MANAGER_ARGS="... \
+... \
+--allocate-node-cidrs \
+...
+```
+
+这句话的意思是，各个 Node 的网段由 `kube-controller-manager` 来分配。
+
+保存，在 master 上重启 `kube-controller-manager`，并且在 node 上重启 `flanneld`。
+
+### 安装 kube-proxy
+
+[TODO]
