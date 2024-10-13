@@ -365,7 +365,7 @@ drwxr-xr-x. 3 root root   17 Oct 13 13:38 ..
 
 这些全是二进制可执行的文件，我们把他们都放在 `/usr/local/bin` 里面。
 
-可以在 `~/.bash_profile` 里面把 `/usr/local/bin` 加到 PATH 里。
+如果前面还没做过的话，现在可以在 `~/.bash_profile` 文件中把 `/usr/local/bin` 加到 PATH 里。
 
 ```bash
 echo "export PATH=$PATH:/usr/local/bin" >> ~/.bash_profile
