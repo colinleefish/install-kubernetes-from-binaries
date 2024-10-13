@@ -959,6 +959,8 @@ mv flannel-amd64 /opt/cni/bin/flannel
 > [!NOTE]
 >
 > 如果在前面创建了 Pod，在调整网络之前，需要把它们先都清理掉。否则会出问题。
+>
+> 可以执行 `kubectl delete deployment nginx` 将前面的 Pod 都删掉。
 
 ```bash
 rm -f /etc/cni/net.d/*
