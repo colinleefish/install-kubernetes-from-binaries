@@ -956,6 +956,10 @@ mv flannel-amd64 /opt/cni/bin/flannel
 
 切换成 flannel 之前，需要把我们前面配置的路由 CNI 配置清理掉。
 
+> [!NOTE]
+>
+> 如果在前面创建了 Pod，在调整网络之前，需要把它们先都清理掉。否则会出问题。
+
 ```bash
 rm -f /etc/cni/net.d/*
 ```
