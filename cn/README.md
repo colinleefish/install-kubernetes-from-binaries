@@ -774,7 +774,8 @@ containerRuntimeEndpoint: "unix:///var/run/containerd/containerd.sock"
 resolvConf: "/etc/resolv.conf"
 runtimeRequestTimeout: "15m"
 
-podCIDR: "10.244.0.0/16"
+# 两个节点的这个配置不一样，node01 是 10.244.1.0/24，node02 是 10.244.2.0/24
+podCIDR: "10.244.1.0/24"
 ```
 
 准备 kubelet 的 Systemd service 文件 `/etc/systemd/system/kubelet.service`，请注意 --node-ip 的参数，这个地方要分别改为 Node 的主 IP，我们这个实验当中分别是 56.11 和 56.12。
