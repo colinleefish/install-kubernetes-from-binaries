@@ -332,6 +332,29 @@ openssl genrsa -out sa-key.pem 2048
 openssl rsa -in sa-key.pem -pubout -out sa-pub.pem
 ```
 
+到这里为止，如果证书文件夹包含了下面这些文件，那基本说明这步安装完成。
+
+```bash
+[root@master pki]# ls -alh
+total 60K
+drwxr-xr-x. 2 root root 4.0K Oct 13 13:51 .
+drwxr-xr-x. 3 root root   17 Oct 13 13:38 ..
+-rw-r--r--. 1 root root 1009 Oct 13 13:48 ca.csr
+-rw-r--r--. 1 root root  214 Oct 13 13:48 ca-csr.json
+-rw-------. 1 root root 1.7K Oct 13 13:48 ca-key.pem
+-rw-r--r--. 1 root root 1.3K Oct 13 13:48 ca.pem
+-rw-r--r--. 1 root root  920 Oct 13 13:51 client.csr
+-rw-r--r--. 1 root root  130 Oct 13 13:51 client-csr.json
+-rw-------. 1 root root 1.7K Oct 13 13:51 client-key.pem
+-rw-r--r--. 1 root root 1.3K Oct 13 13:51 client.pem
+-rw-r--r--. 1 root root 1.2K Oct 13 13:50 kube-apiserver.csr
+-rw-r--r--. 1 root root  411 Oct 13 13:49 kube-apiserver-csr.json
+-rw-------. 1 root root 1.7K Oct 13 13:50 kube-apiserver-key.pem
+-rw-r--r--. 1 root root 1.6K Oct 13 13:50 kube-apiserver.pem
+-rw-------. 1 root root 1.7K Oct 13 13:51 sa-key.pem
+-rw-r--r--. 1 root root  451 Oct 13 13:51 sa-pub.pem
+```
+
 接下来开始[安装 Master 节点](/cn/03-安装Master节点.md)。
 
 ## 三、安装 Master 节点
