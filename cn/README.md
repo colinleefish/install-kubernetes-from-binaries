@@ -917,3 +917,23 @@ wget <POD_IP>
 ```
 
 如果能 ping 通，wget 也能获取到 index.html 文件，说明网络正常。
+
+## 七、安装 Flannel 网络插件
+
+在前面的网络设置中我们使用系统间的路由表来做流量导向，这个方案可以在集群里访问 Pod 地址，但无法访问到 Service 地址。
+
+这个章节我们来安装 Flannel，通过它实现 Pod 和 Service 等网络的联通。
+
+首先在 Node 节点下载 flannel 的守护进程和 CNI 插件。
+
+```
+wget https://github.com/flannel-io/flannel/releases/download/v0.25.7/flannel-v0.25.7-linux-amd64.tar.gz
+```
+
+解压，将里面的 `flanneld` 文件挪到 `/usr/local/bin`。
+
+```bash
+mv flanneld /usr/local/bin
+```
+
+
