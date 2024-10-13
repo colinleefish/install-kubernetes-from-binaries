@@ -258,7 +258,8 @@ cfssl genkey -initca ca-csr.json | cfssljson -bare ca
       "C": "US",
       "L": "San Francisco",
       "O": "Kubernetes",
-      "OU": "Kubernetes"
+      "OU": "CA",
+      "ST": "California"
     }
   ]
 }
