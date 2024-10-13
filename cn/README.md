@@ -924,9 +924,9 @@ wget <POD_IP>
 
 这个章节我们来安装 Flannel，通过它实现 Pod 和 Service 等网络的联通。
 
-首先在 Node 节点下载 flannel 的守护进程 `flanneld`。
+### 安装和 Flannel
 
-### 安装和配置 Flannel
+首先在 Node 节点下载 flannel 的守护进程 `flanneld`。
 
 ```bash
 wget https://github.com/flannel-io/flannel/releases/download/v0.25.7/flannel-v0.25.7-linux-amd64.tar.gz
@@ -952,5 +952,35 @@ tar xzvf cni-plugin-flannel-linux-amd64-v1.5.1-flannel3.tgz
 mv flannel-amd64 /opt/cni/bin/flannel
 ```
 
+### 配置 flannel
 
+切换成 flannel 之前，需要把我们前面配置的路由 CNI 配置清理掉。
+
+```bash
+rm -f /etc/cni/net.d/*
+```
+
+然后创建 `/etc/cni/net.d/10-flannel.conflist`，添加以下内容。
+
+```json
+{
+  "name": "cbr0",
+  "cniVersion": "0.3.1",
+  "plugins": [
+    {
+      "type": "flannel",
+      "delegate": {
+        "hairpinMode": true,
+        "isDefaultGateway": true
+      }
+    },
+    {
+      "type": "portmap",
+      "capabilities": {
+        "portMappings": true
+      }
+    }
+  ]
+}
+```
 
