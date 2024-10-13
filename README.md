@@ -1,3 +1,5 @@
+
+
 # Install Kubernetes from Binaries
 
 This is a notebook I made while learning to install Kubernetes from binaries. I set up one Master and two Nodes. No scripts were used during the installation, and there's no HA setup.
@@ -42,7 +44,11 @@ This notebook refers to the following materials:
 - ["Kubernetes Authority Guide"](https://book.douban.com/subject/35458432/)
 - [kelseyhightower/kubernetes-the-hard-way](https://github.com/kelseyhightower/kubernetes-the-hard-way)
 
-##
+## Disclaimer
+
+This repository and its content are created solely for educational purposes. I, the owner of this repository, am not affiliated with, endorsed by, or in any way officially connected with Kubernetes, the Kubernetes project, or the Cloud Native Computing Foundation (CNCF). All trademarks, logos, and brand names are the property of their respective owners. The use of "Kubernetes" in this repository is purely for descriptive purposes and does not imply any relationship, sponsorship, or endorsement by Kubernetes or CNCF.
+
+For official information about Kubernetes, please visit kubernetes.io.
 
 ---
 
