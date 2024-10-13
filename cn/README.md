@@ -918,11 +918,13 @@ wget <POD_IP>
 
 如果能 ping 通，wget 也能获取到 index.html 文件，说明网络正常。
 
-## 七、安装 Flannel 网络插件
+## 七、安装 Flannel 网络插件和 kube-proxy
 
-在前面的网络设置中我们使用系统间的路由表来做流量导向，这个方案可以在集群里访问 Pod 地址，但无法访问到 Service 地址。
+在前面的网络设置中我们使用系统间的路由表来做流量导向，这个方案可以在集群里访问 Pod 地址
 
-这个章节我们来安装 Flannel，通过它实现 Pod 和 Service 等网络的联通。
+这个章节我们来安装 Flannel，通过它实现 Pod 网络的联通。
+
+并且还会介绍 kube-proxy 的安装，让集群支持 Service 网络。
 
 ### 安装和 Flannel
 
@@ -966,7 +968,7 @@ mv flannel-amd64 /opt/cni/bin/flannel
 rm -f /etc/cni/net.d/*
 ```
 
-然后创建 `/etc/cni/net.d/10-flannel.conflist`，添加以下内容。
+然后创建 `/etc/cni/net.d/10-flannel.conflist`，添加以下内容。这个配置文件是给容器 Runtime 看的，为的是告诉 Runtime 我们要用 flannel。
 
 ```json
 {
@@ -989,4 +991,46 @@ rm -f /etc/cni/net.d/*
   ]
 }
 ```
+
+接下来准备一份给 flanneld 看的配置文件。创建 `/etc/kube-flannel/net-conf.json`，添加下面的内容，两个 Node 内容一样。
+
+```json
+{
+  "Network": "10.244.0.0/16",
+  "EnableNFTables": false,
+  "Backend": {
+    "Type": "vxlan"
+  }
+}
+```
+
+然后准备 flanneld 的 service 文件 `/etc/systemd/system/flanneld.service`。
+
+```ini
+[Unit]
+Description=Flannel
+Documentation=https://github.com/flannel-io/flannel/
+
+[Service]
+EnvironmentFile=/etc/kubernetes/flanneld.env
+ExecStart=/usr/local/bin/flanneld $FLANNELD_ARGS
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+```
+
+并且还要准备启动的参数和环境变量。
+
+```ini
+NODE_NAME="node01"
+FLANNELD_ARGS="-kube-subnet-mgr \
+-kubeconfig-file=/etc/kubernetes/admin.kubeconfig \
+-ip-masq \
+-public-ip=192.168.56.11 \
+-iface=eth1"
+```
+
+这些配置参数当中 `NODE_NAME` 要根据具体的 node 进行修改，第一台就写 `node01`，第二台就写 `node02`。
 
