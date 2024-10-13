@@ -231,7 +231,7 @@ cfssl genkey -initca ca-csr.json | cfssljson -bare ca
 
 接下来我们要生成 API Server 的证书，这个证书类似于常见的 HTTPS 证书，主要用于在服务端证明它确实是 API Server。
 
-需要注意的是，客户端访问 API Server 的地址可能不同：有的通过 Service IP（10.96.0.1），有的使用 https://master:6443，或者直接通过 IP 地址（192.168.56.10）。因此，证书必须涵盖这些不同的访问地址。在签发证书时，我们需要将这些地址信息一并包含，就像给 API Server 发一张‘身份证’，上面列出了它的多个合法名称。
+需要注意的是，客户端访问 API Server 的地址可能不同：有的通过 Service IP（10.96.0.1），有的使用 https://master:6443 ，或者直接通过 IP 地址（192.168.56.10）。因此，证书必须涵盖这些不同的访问地址。在签发证书时，我们需要将这些地址信息一并包含，就像给 API Server 发一张‘身份证’，上面列出了它的多个合法名称。
 
 在证书技术中，指定多个地址的方式叫做 Subject Alternative Names (SANs)，我们稍后会在证书的配置文件中添加这些 SAN 信息。
 
