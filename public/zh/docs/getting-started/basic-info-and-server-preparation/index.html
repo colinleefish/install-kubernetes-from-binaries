@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="zh" dir="ltr">
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="
+  一、基本信息和服务器准备
+  #
+
+这部分记录了服务器准备信息。
+
+  基本信息
+  #
+
+需要的准备内容：
+
+3 台能上网的 Linux 服务器，这次我用的是 Rocky Linux 8
+3 个同网段的 IP，挂在这 3 台服务器上
+
+计划表如下：
+
+  
+      
+          角色
+          IP
+          要在上面安装的组件
+      
+  
+  
+      
+          master
+          192.168.56.10
+          etcdkube-apiserver kube-controller-managerkube-scheduler
+      
+      
+          node01
+          192.168.56.11
+          containerdkubelet kube-proxy 
+      
+      
+          node02
+          192.168.56.12
+          containerdkubelet kube-proxy 
+      
+  
+
+
+[!NOTE]
+项目中包含了一个给 Virtualbox 用的 Vagrantfile，用来快速启动 3 个服务器，知道怎么用的话可以用那个
+
+
+  服务器准备
+  #
+
+设置这 3 台服务器的 hostname
+hostnamectl set-hostname (master|node01|node01)
+把这三个 hostname 都写在 /etc/hosts 里面
+192.168.56.10 master
+192.168.56.11 node01
+192.168.56.12 node02
+设置好时间和时区（根据自己的实际情况进行设置）
+timedatectl set-timezone &lt;你的时区&gt;
+在 3 台服务器上安装一些基础工具">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#343a40">
+<meta name="color-scheme" content="light dark"><meta property="og:url" content="http://localhost:1313/zh/docs/getting-started/basic-info-and-server-preparation/">
+  <meta property="og:site_name" content="Install Kubernetes from binaries">
+  <meta property="og:title" content="一、基本信息和服务器准备">
+  <meta property="og:description" content="一、基本信息和服务器准备 # 这部分记录了服务器准备信息。
+基本信息 # 需要的准备内容：
+3 台能上网的 Linux 服务器，这次我用的是 Rocky Linux 8 3 个同网段的 IP，挂在这 3 台服务器上 计划表如下：
+角色 IP 要在上面安装的组件 master 192.168.56.10 etcdkube-apiserver kube-controller-managerkube-scheduler node01 192.168.56.11 containerdkubelet kube-proxy node02 192.168.56.12 containerdkubelet kube-proxy [!NOTE]
+项目中包含了一个给 Virtualbox 用的 Vagrantfile，用来快速启动 3 个服务器，知道怎么用的话可以用那个
+服务器准备 # 设置这 3 台服务器的 hostname
+hostnamectl set-hostname (master|node01|node01) 把这三个 hostname 都写在 /etc/hosts 里面
+192.168.56.10 master 192.168.56.11 node01 192.168.56.12 node02 设置好时间和时区（根据自己的实际情况进行设置）
+timedatectl set-timezone &lt;你的时区&gt; 在 3 台服务器上安装一些基础工具">
+  <meta property="og:locale" content="zh">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="docs">
+<title>一、基本信息和服务器准备 | Install Kubernetes from binaries</title>
+<link rel="icon" href="/favicon.png" >
+<link rel="manifest" href="/manifest.json">
+<link rel="canonical" href="http://localhost:1313/zh/docs/getting-started/basic-info-and-server-preparation/">
+<link rel="stylesheet" href="/book.min.6c8b9d2a1fc95075ed7da46ca81060b39add8fff6741ac51259f768929281e2c.css" integrity="sha256-bIudKh/JUHXtfaRsqBBgs5rdj/9nQaxRJZ92iSkoHiw=" crossorigin="anonymous">
+  <script defer src="/fuse.min.js"></script>
+  <script defer src="/zh.search.min.509cc74ce206b987f7c45f3959c96b65a53156e5462a6602a8bdbabac548b1c6.js" integrity="sha256-UJzHTOIGuYf3xF85WclrZaUxVuVGKmYCqL26usVIscY=" crossorigin="anonymous"></script>
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+  
+</head>
+<body dir="ltr">
+  <input type="checkbox" class="hidden toggle" id="menu-control" />
+  <input type="checkbox" class="hidden toggle" id="toc-control" />
+  <main class="container flex">
+    <aside class="book-menu">
+      <div class="book-menu-content">
+        
+  <nav>
+<h2 class="book-brand">
+  <a class="flex align-center" href="/zh/"><span>Install Kubernetes from binaries</span>
+  </a>
+</h2>
+
+
+<div class="book-search hidden">
+  <input type="text" id="book-search-input" placeholder="搜索" aria-label="搜索" maxlength="64" data-hotkeys="s/" />
+  <div class="book-search-spinner hidden"></div>
+  <ul id="book-search-results"></ul>
+</div>
+<script>document.querySelector(".book-search").classList.remove("hidden")</script>
+
+
+
+  
+
+
+
+  
+    
+  
+
+
+
+<ul class="book-languages">
+  <li>
+    <input type="checkbox" id="languages" class="toggle" />
+    <label for="languages" class="flex justify-between">
+      <a role="button" class="flex align-center">
+        <img src="/svg/translate.svg" class="book-icon" alt="Languages" />
+        Chinese
+      </a>
+    </label>
+
+    <ul>
+      
+      <li>
+        <a href="/">
+          English
+        </a>
+      </li>
+      
+    </ul>
+  </li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <ul>
+    
+      
+        <li class="book-section-flat" >
+          
+  
+  
+
+  
+    <a href="/zh/docs/getting-started/" class="">基础部分</a>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/zh/docs/getting-started/basic-info-and-server-preparation/" class="active">一、基本信息和服务器准备</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/zh/docs/getting-started/certificates-and-keys/" class="">二、K8s 的证书和 Key</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li class="book-section-flat" >
+          
+  
+  
+
+  
+    <span>进阶部分</span>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/zh/docs/advanced/buttons/" class="">Buttons</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/zh/docs/advanced/columns/" class="">Columns</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/zh/docs/advanced/details/" class="">Details</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/zh/docs/advanced/hints/" class="">Hints</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/zh/docs/advanced/mermaid/" class="">Mermaid</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/zh/docs/advanced/tabs/" class="">Tabs</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/zh/docs/advanced/katex/" class="">KaTeX</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+  </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</nav>
+
+
+
+
+  <script>(function(){var e=document.querySelector("aside .book-menu-content");addEventListener("beforeunload",function(){localStorage.setItem("menu.scrollTop",e.scrollTop)}),e.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
+
+
+ 
+      </div>
+    </aside>
+
+    <div class="book-page">
+      <header class="book-header">
+        
+  <div class="flex align-center justify-between">
+  <label for="menu-control">
+    <img src="/svg/menu.svg" class="book-icon" alt="Menu" />
+  </label>
+
+  <h3>一、基本信息和服务器准备</h3>
+
+  <label for="toc-control">
+    
+  </label>
+</div>
+
+
+  
+ 
+      </header>
+
+      
+      
+  <article class="markdown book-article"><h2 id="一基本信息和服务器准备">
+  一、基本信息和服务器准备
+  <a class="anchor" href="#%e4%b8%80%e5%9f%ba%e6%9c%ac%e4%bf%a1%e6%81%af%e5%92%8c%e6%9c%8d%e5%8a%a1%e5%99%a8%e5%87%86%e5%a4%87">#</a>
+</h2>
+<p>这部分记录了服务器准备信息。</p>
+<h3 id="基本信息">
+  基本信息
+  <a class="anchor" href="#%e5%9f%ba%e6%9c%ac%e4%bf%a1%e6%81%af">#</a>
+</h3>
+<p>需要的准备内容：</p>
+<ol>
+<li>3 台能上网的 Linux 服务器，这次我用的是 Rocky Linux 8</li>
+<li>3 个同网段的 IP，挂在这 3 台服务器上</li>
+</ol>
+<p>计划表如下：</p>
+<table>
+  <thead>
+      <tr>
+          <th>角色</th>
+          <th>IP</th>
+          <th>要在上面安装的组件</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>master</td>
+          <td>192.168.56.10</td>
+          <td><ul><li>etcd</li><li>kube-apiserver</li> <li>kube-controller-manager</li><li>kube-scheduler</li></ul></td>
+      </tr>
+      <tr>
+          <td>node01</td>
+          <td>192.168.56.11</td>
+          <td><ul><li>containerd</li><li>kubelet</li> <li>kube-proxy</li> </ul></td>
+      </tr>
+      <tr>
+          <td>node02</td>
+          <td>192.168.56.12</td>
+          <td><ul><li>containerd</li><li>kubelet</li> <li>kube-proxy</li> </ul></td>
+      </tr>
+  </tbody>
+</table>
+<blockquote>
+<p>[!NOTE]<br>
+项目中包含了一个给 Virtualbox 用的 Vagrantfile，用来快速启动 3 个服务器，知道怎么用的话可以用那个</p>
+</blockquote>
+<h3 id="服务器准备">
+  服务器准备
+  <a class="anchor" href="#%e6%9c%8d%e5%8a%a1%e5%99%a8%e5%87%86%e5%a4%87">#</a>
+</h3>
+<p>设置这 3 台服务器的 hostname</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>hostnamectl set-hostname <span style="color:#f92672">(</span>master|node01|node01<span style="color:#f92672">)</span>
+</span></span></code></pre></div><p>把这三个 hostname 都写在 /etc/hosts 里面</p>
+<pre tabindex="0"><code class="language-/etc/hosts" data-lang="/etc/hosts">192.168.56.10 master
+192.168.56.11 node01
+192.168.56.12 node02
+</code></pre><p>设置好时间和时区（根据自己的实际情况进行设置）</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>timedatectl set-timezone &lt;你的时区&gt;
+</span></span></code></pre></div><p>在 3 台服务器上安装一些基础工具</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>dnf install wget vim
+</span></span></code></pre></div><p>master 节点还要安装 OpenSSL，一会儿我们在这台机器上创建证书</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>dnf install openssl
+</span></span></code></pre></div><p>node 节点还要安装一些后面要用到的工具</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>dnf install socat conntrack ipset
+</span></span></code></pre></div><p>关闭 swap 和 selinux</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>vim /etc/fstab
+</span></span><span style="display:flex;"><span>vim /etc/selinux/config
+</span></span></code></pre></div><p>允许 ip_forward（这样的话 Node 节点才知道要把数据包转发给 Pod）</p>
+<p>编辑 <code>/etc/sysctl.conf</code>，添加下面这句话</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-ini" data-lang="ini"><span style="display:flex;"><span><span style="color:#a6e22e">net.ipv4.ip_forward</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">1</span>
+</span></span></code></pre></div><p>保存，然后执行 <code>sysctl -p</code> 让我们的设置生效。</p>
+<p>创建 K8s 各个组件的配置文件夹，我们后面还要创建其他文件夹</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>mkdir /etc/kubernetes       <span style="color:#75715e"># 这里放配置</span>
+</span></span><span style="display:flex;"><span>mkdir /etc/kubernetes/pki   <span style="color:#75715e"># 这里放证书</span>
+</span></span></code></pre></div><h3 id="有关网络的特别说明">
+  有关网络的特别说明
+  <a class="anchor" href="#%e6%9c%89%e5%85%b3%e7%bd%91%e7%bb%9c%e7%9a%84%e7%89%b9%e5%88%ab%e8%af%b4%e6%98%8e">#</a>
+</h3>
+<p>执行 <code>ip addr</code> 后，</p>
+<p>如果你的机器上只显示 <code>lo</code> 和 <code>eth0</code>，那么在本次配置中，你的主网卡就是 <code>eth0</code>。</p>
+<p>如果你使用了 VirtualBox，可能会有一个 <code>NAT</code> 网络和一个 <code>Host-only</code> 网络：<code>NAT</code> 网络用于联网下载资源，<code>Host-only</code> 网络用于虚拟机之间的互联。在这种情况下，主网卡是 <code>Host-only</code> 的那个网卡，K8s 各 Node 之间的通信会通过这张网卡进行。</p>
+<p>建议在每台服务器上相互 ping 一下，确保节点间可以互通。</p>
+<p>接下来准备 <a href="/cn/02-K8s%e7%9a%84%e8%af%81%e4%b9%a6.md">K8s 的证书</a>。</p>
+</article>
+ 
+      
+
+      <footer class="book-footer">
+        
+  <div class="flex flex-wrap justify-between">
+
+
+
+
+
+</div>
+
+
+
+  <script>(function(){function e(e){const t=window.getSelection(),n=document.createRange();n.selectNodeContents(e),t.removeAllRanges(),t.addRange(n)}document.querySelectorAll("pre code").forEach(t=>{t.addEventListener("click",function(){if(window.getSelection().toString())return;e(t.parentElement),navigator.clipboard&&navigator.clipboard.writeText(t.parentElement.textContent)})})})()</script>
+
+
+ 
+        
+      </footer>
+
+      
+  
+  <div class="book-comments">
+
+</div>
+  
+ 
+
+      <label for="menu-control" class="hidden book-menu-overlay"></label>
+    </div>
+
+    
+  </main>
+
+  
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+

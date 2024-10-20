@@ -1,0 +1,25 @@
+baseURL = 'https://install-kubernetes-from-binaries.com/'
+title = 'Install Kubernetes from binaries'
+theme = 'hugo-book'
+
+[markup]
+[markup.goldmark.renderer]
+  unsafe = true
+
+[markup.tableOfContents]
+  startLevel = 1
+
+# Multi-lingual mode config
+# There are different options to translate files
+# See https://gohugo.io/content-management/multilingual/#translation-by-filename
+# And https://gohugo.io/content-management/multilingual/#translation-by-content-directory
+[languages]
+[languages.en]
+  languageName = 'English'
+  contentDir = 'content.en'
+  weight = 1
+
+[languages.zh]
+  languageName = 'Chinese'
+  contentDir = 'content.zh'
+  weight = 2

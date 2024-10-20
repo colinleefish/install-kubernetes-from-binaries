@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="zh" dir="ltr">
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="
+  二、K8s 的证书
+  #
+
+K8s 各个组件之间的交互都是通过 HTTPS 实现的：controller 访问 apiserver、kubelet 访问 apiserver，甚至我们使用 kubectl 工具操作时，都是通过 HTTPS 连接到 apiserver。
+这与我们通过浏览器访问网站时使用的 HTTPS 类似，但 K8s 采用双向认证。不仅服务端需要证书和密钥，客户端也要准备自己的证书和密钥来证明身份。
+为了简化，接下来我们只准备几个证书，能共享的组件就共用这些证书。
+
+  
+      
+          证书
+          用到这个证书的组件
+          文件
+          角色
+      
+  
+  
+      
+          CA
+          所有
+          ca-key.pem（Key）ca.pem（证书）
+          根证书
+      
+      
+          API Server 证书
+          kube-apiserver
+          apiserver-key.pem（Key）apiserver.pem（证书）
+          API Server 的服务端证书
+      
+      
+          Client 证书
+          各种组件都会用
+          client-key.pem（Key）client.pem（证书）
+          用来访问 API Server 的客户端证书
+      
+      
+          Service Account 证书
+          kube-apiserver
+          sa-key.pem（私钥）sa-pub.pem（公钥）
+          Service Account JWT Token 的签发证书
+      
+  
+
+
+提示
+Service Account 证书是一对公私钥，和前面说到的 HTTPS 双向认证证书说的不是一个东西。这个后面会再提到。
+
+
+  工具准备
+  #
+
+这个部分我们用 Cloudflare 的 SSL 工具 cfssl。">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#343a40">
+<meta name="color-scheme" content="light dark"><meta property="og:url" content="http://localhost:1313/zh/docs/getting-started/certificates-and-keys/">
+  <meta property="og:site_name" content="Install Kubernetes from binaries">
+  <meta property="og:title" content="二、K8s 的证书和 Key">
+  <meta property="og:description" content="二、K8s 的证书 # K8s 各个组件之间的交互都是通过 HTTPS 实现的：controller 访问 apiserver、kubelet 访问 apiserver，甚至我们使用 kubectl 工具操作时，都是通过 HTTPS 连接到 apiserver。
+这与我们通过浏览器访问网站时使用的 HTTPS 类似，但 K8s 采用双向认证。不仅服务端需要证书和密钥，客户端也要准备自己的证书和密钥来证明身份。
+为了简化，接下来我们只准备几个证书，能共享的组件就共用这些证书。
+证书 用到这个证书的组件 文件 角色 CA 所有 ca-key.pem（Key）ca.pem（证书） 根证书 API Server 证书 kube-apiserver apiserver-key.pem（Key）apiserver.pem（证书） API Server 的服务端证书 Client 证书 各种组件都会用 client-key.pem（Key）client.pem（证书） 用来访问 API Server 的客户端证书 Service Account 证书 kube-apiserver sa-key.pem（私钥）sa-pub.pem（公钥） Service Account JWT Token 的签发证书 提示
+Service Account 证书是一对公私钥，和前面说到的 HTTPS 双向认证证书说的不是一个东西。这个后面会再提到。
+工具准备 # 这个部分我们用 Cloudflare 的 SSL 工具 cfssl。">
+  <meta property="og:locale" content="zh">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="docs">
+<title>二、K8s 的证书和 Key | Install Kubernetes from binaries</title>
+<link rel="icon" href="/favicon.png" >
+<link rel="manifest" href="/manifest.json">
+<link rel="canonical" href="http://localhost:1313/zh/docs/getting-started/certificates-and-keys/">
+<link rel="stylesheet" href="/book.min.6c8b9d2a1fc95075ed7da46ca81060b39add8fff6741ac51259f768929281e2c.css" integrity="sha256-bIudKh/JUHXtfaRsqBBgs5rdj/9nQaxRJZ92iSkoHiw=" crossorigin="anonymous">
+  <script defer src="/fuse.min.js"></script>
+  <script defer src="/zh.search.min.509cc74ce206b987f7c45f3959c96b65a53156e5462a6602a8bdbabac548b1c6.js" integrity="sha256-UJzHTOIGuYf3xF85WclrZaUxVuVGKmYCqL26usVIscY=" crossorigin="anonymous"></script>
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+  
+</head>
+<body dir="ltr">
+  <input type="checkbox" class="hidden toggle" id="menu-control" />
+  <input type="checkbox" class="hidden toggle" id="toc-control" />
+  <main class="container flex">
+    <aside class="book-menu">
+      <div class="book-menu-content">
+        
+  <nav>
+<h2 class="book-brand">
+  <a class="flex align-center" href="/zh/"><span>Install Kubernetes from binaries</span>
+  </a>
+</h2>
+
+
+<div class="book-search hidden">
+  <input type="text" id="book-search-input" placeholder="搜索" aria-label="搜索" maxlength="64" data-hotkeys="s/" />
+  <div class="book-search-spinner hidden"></div>
+  <ul id="book-search-results"></ul>
+</div>
+<script>document.querySelector(".book-search").classList.remove("hidden")</script>
+
+
+
+  
+
+
+
+  
+    
+  
+
+
+
+<ul class="book-languages">
+  <li>
+    <input type="checkbox" id="languages" class="toggle" />
+    <label for="languages" class="flex justify-between">
+      <a role="button" class="flex align-center">
+        <img src="/svg/translate.svg" class="book-icon" alt="Languages" />
+        Chinese
+      </a>
+    </label>
+
+    <ul>
+      
+      <li>
+        <a href="/">
+          English
+        </a>
+      </li>
+      
+    </ul>
+  </li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <ul>
+    
+      
+        <li class="book-section-flat" >
+          
+  
+  
+
+  
+    <a href="/zh/docs/getting-started/" class="">基础部分</a>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/zh/docs/getting-started/basic-info-and-server-preparation/" class="">一、基本信息和服务器准备</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/zh/docs/getting-started/certificates-and-keys/" class="active">二、K8s 的证书和 Key</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li class="book-section-flat" >
+          
+  
+  
+
+  
+    <span>进阶部分</span>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/zh/docs/advanced/buttons/" class="">Buttons</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/zh/docs/advanced/columns/" class="">Columns</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/zh/docs/advanced/details/" class="">Details</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/zh/docs/advanced/hints/" class="">Hints</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/zh/docs/advanced/mermaid/" class="">Mermaid</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/zh/docs/advanced/tabs/" class="">Tabs</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/zh/docs/advanced/katex/" class="">KaTeX</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+  </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</nav>
+
+
+
+
+  <script>(function(){var e=document.querySelector("aside .book-menu-content");addEventListener("beforeunload",function(){localStorage.setItem("menu.scrollTop",e.scrollTop)}),e.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
+
+
+ 
+      </div>
+    </aside>
+
+    <div class="book-page">
+      <header class="book-header">
+        
+  <div class="flex align-center justify-between">
+  <label for="menu-control">
+    <img src="/svg/menu.svg" class="book-icon" alt="Menu" />
+  </label>
+
+  <h3>二、K8s 的证书和 Key</h3>
+
+  <label for="toc-control">
+    
+  </label>
+</div>
+
+
+  
+ 
+      </header>
+
+      
+      
+  <article class="markdown book-article"><h2 id="二k8s-的证书">
+  二、K8s 的证书
+  <a class="anchor" href="#%e4%ba%8ck8s-%e7%9a%84%e8%af%81%e4%b9%a6">#</a>
+</h2>
+<p>K8s 各个组件之间的交互都是通过 HTTPS 实现的：controller 访问 apiserver、kubelet 访问 apiserver，甚至我们使用 kubectl 工具操作时，都是通过 HTTPS 连接到 apiserver。</p>
+<p>这与我们通过浏览器访问网站时使用的 HTTPS 类似，但 K8s 采用双向认证。不仅服务端需要证书和密钥，客户端也要准备自己的证书和密钥来证明身份。</p>
+<p>为了简化，接下来我们只准备几个证书，能共享的组件就共用这些证书。</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: left">证书</th>
+          <th>用到这个证书的组件</th>
+          <th>文件</th>
+          <th>角色</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left">CA</td>
+          <td>所有</td>
+          <td><ul><li>ca-key.pem（Key）</li><li>ca.pem（证书）</li></ul></td>
+          <td>根证书</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">API Server 证书</td>
+          <td>kube-apiserver</td>
+          <td><ul><li>apiserver-key.pem（Key）</li><li>apiserver.pem（证书）</li></ul></td>
+          <td>API Server 的服务端证书</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">Client 证书</td>
+          <td>各种组件都会用</td>
+          <td><ul><li>client-key.pem（Key）</li><li>client.pem（证书）</li></ul></td>
+          <td>用来访问 API Server 的客户端证书</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">Service Account 证书</td>
+          <td>kube-apiserver</td>
+          <td><ul><li>sa-key.pem（私钥）</li><li>sa-pub.pem（公钥）</li></ul></td>
+          <td>Service Account JWT Token 的签发证书</td>
+      </tr>
+  </tbody>
+</table>
+<blockquote class="book-hint info">
+<p><strong>提示</strong></p>
+<p>Service Account 证书是一对公私钥，和前面说到的 HTTPS 双向认证证书说的不是一个东西。这个后面会再提到。</p>
+</blockquote>
+<h3 id="工具准备">
+  工具准备
+  <a class="anchor" href="#%e5%b7%a5%e5%85%b7%e5%87%86%e5%a4%87">#</a>
+</h3>
+<p>这个部分我们用 Cloudflare 的 SSL 工具 <code>cfssl</code>。</p>
+<p>下载地址在这里：<a href="https://github.com/cloudflare/cfssl/releases/">https://github.com/cloudflare/cfssl/releases/</a></p>
+<p>我们主要用到里面的 <code>cfssl</code> 和 <code>cfssljson</code> 这两个二进制。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>wget https://github.com/cloudflare/cfssl/releases/download/v1.6.5/cfssl_1.6.5_linux_amd64
+</span></span><span style="display:flex;"><span>wget https://github.com/cloudflare/cfssl/releases/download/v1.6.5/cfssljson_1.6.5_linux_amd64
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>mv cfssl_1.6.5_linux_amd64 /usr/local/bin/cfssl
+</span></span><span style="display:flex;"><span>mv cfssljson_1.6.5_linux_amd64 /usr/local/bin/cfssljson
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>chmod +x /usr/local/bin/cfssl
+</span></span><span style="display:flex;"><span>chmod +x /usr/local/bin/cfssljson
+</span></span></code></pre></div><p>我们趁这个机会把 <code>/usr/local/bin</code> 放在 <code>PATH</code> 里，后面其他的 bin 也都会放在这里。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>echo <span style="color:#e6db74">&#34;export PATH=</span>$PATH<span style="color:#e6db74">:/usr/local/bin&#34;</span> &gt;&gt; ~/.bash_profile
+</span></span><span style="display:flex;"><span>source ~/.bash_profile
+</span></span></code></pre></div><p>你可能听说 OpenSSL 也能生成证书的工具。那个用起来有一些难受，所以我们在创建证书的时候就不用那个了，创建 Key 的时候会简单用用。</p>
+<h3 id="生成-ca-证书">
+  生成 CA 证书
+  <a class="anchor" href="#%e7%94%9f%e6%88%90-ca-%e8%af%81%e4%b9%a6">#</a>
+</h3>
+<p>证书是一个树状的结构，CA 证书是这个树状结构的根，K8s 其他证书的生成过程中都要带上 CA 的证书，仿佛是声明了一种父子关系：其他证书都是这张根证书的“儿子”，他们有一个共同的“父亲”。</p>
+<p>我们先来生成 CA 这个“父亲”。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>cd /etc/kubernetes/pki/
+</span></span></code></pre></div><p>创建 <code>ca-csr.json</code> 文件，写下面的内容。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;CN&#34;</span>: <span style="color:#e6db74">&#34;IKFB&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;key&#34;</span>: {
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;algo&#34;</span>: <span style="color:#e6db74">&#34;rsa&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;size&#34;</span>: <span style="color:#ae81ff">2048</span>
+</span></span><span style="display:flex;"><span>  },
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;names&#34;</span>: [
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;C&#34;</span>: <span style="color:#e6db74">&#34;US&#34;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;L&#34;</span>: <span style="color:#e6db74">&#34;San Francisco&#34;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;O&#34;</span>: <span style="color:#e6db74">&#34;Kubernetes&#34;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;OU&#34;</span>: <span style="color:#e6db74">&#34;CA&#34;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;ST&#34;</span>: <span style="color:#e6db74">&#34;California&#34;</span>
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  ]
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>然后用 <code>cfssl</code> 工具生成 <code>ca-key.pem</code> 密钥和 <code>ca.pem</code> 证书。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>cfssl genkey -initca ca-csr.json | cfssljson -bare ca
+</span></span></code></pre></div><h3 id="生成-api-server-的证书">
+  生成 API Server 的证书
+  <a class="anchor" href="#%e7%94%9f%e6%88%90-api-server-%e7%9a%84%e8%af%81%e4%b9%a6">#</a>
+</h3>
+<p>接下来我们要生成 API Server 的证书，这个证书类似于常见的 HTTPS 证书，主要用于在服务端证明它确实是 API Server。</p>
+<p>需要注意的是，客户端访问 API Server 的地址可能不同：有的通过 Service IP（10.96.0.1），有的使用 https://master:6443 ，或者直接通过 IP 地址（192.168.56.10）。因此，证书必须涵盖这些不同的访问地址。在签发证书时，我们需要将这些地址信息一并包含，就像给 API Server 发一张‘身份证’，上面列出了它的多个合法名称。</p>
+<p>在证书技术中，指定多个地址的方式叫做 Subject Alternative Names (SANs)，我们稍后会在证书的配置文件中添加这些 SAN 信息。</p>
+<p>复制下面的内容到 <code>kube-apiserver-csr.json</code>。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;CN&#34;</span>: <span style="color:#e6db74">&#34;kube-apiserver&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;hosts&#34;</span>: [
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;kubernetes&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;kubernetes.default&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;kubernetes.default.svc&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;kubernetes.default.svc.cluster.local&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;master&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;10.96.0.1&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;192.168.56.10&#34;</span>
+</span></span><span style="display:flex;"><span>  ],
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;key&#34;</span>: {
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;algo&#34;</span>: <span style="color:#e6db74">&#34;rsa&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;size&#34;</span>: <span style="color:#ae81ff">2048</span>
+</span></span><span style="display:flex;"><span>  },
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;names&#34;</span>: [
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;C&#34;</span>: <span style="color:#e6db74">&#34;US&#34;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;L&#34;</span>: <span style="color:#e6db74">&#34;San Francisco&#34;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;O&#34;</span>: <span style="color:#e6db74">&#34;Kubernetes&#34;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;OU&#34;</span>: <span style="color:#e6db74">&#34;CA&#34;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;ST&#34;</span>: <span style="color:#e6db74">&#34;California&#34;</span>
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  ]
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>然后我们生成 API Server 的证书和 Key。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>cfssl gencert -ca<span style="color:#f92672">=</span>ca.pem -ca-key<span style="color:#f92672">=</span>ca-key.pem -profile<span style="color:#f92672">=</span>kube-apiserver kube-apiserver-csr.json | cfssljson -bare kube-apiserver
+</span></span></code></pre></div><p>这样就得到了 <code>kube-apiserver-key.pem</code> 和 <code>kube-apiserver.pem</code>。</p>
+<h3 id="生成-client-证书">
+  生成 Client 证书
+  <a class="anchor" href="#%e7%94%9f%e6%88%90-client-%e8%af%81%e4%b9%a6">#</a>
+</h3>
+<p>接下来我们生成一张 Client 证书，供访问 API Server 的组件使用。</p>
+<p>这次安装的 K8s 通过证书认证身份。我们创建的证书相当于 K8s 的‘超级管理员’身份。</p>
+<p>这个证书会配置到 controller、scheduler 和 kubelet 的 kubeconfig 中，用于访问 API Server。</p>
+<blockquote>
+<p>[!NOTE]
+其实这些组件应该各自生成专属的证书和 Kubeconfig，但为了简化流程，这里统一使用一张证书。</p>
+<p>请勿在生产环境中这样操作。</p>
+</blockquote>
+<p>首先创建 <code>client-csr.json</code>。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;CN&#34;</span>: <span style="color:#e6db74">&#34;admin&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;key&#34;</span>: {
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;algo&#34;</span>: <span style="color:#e6db74">&#34;rsa&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;size&#34;</span>: <span style="color:#ae81ff">2048</span>
+</span></span><span style="display:flex;"><span>  },
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;names&#34;</span>: [
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;O&#34;</span>: <span style="color:#e6db74">&#34;system:masters&#34;</span>
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  ]
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>然后执行创建证书的命令。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>cfssl gencert -ca<span style="color:#f92672">=</span>ca.pem -ca-key<span style="color:#f92672">=</span>ca-key.pem client-csr.json | cfssljson -bare client
+</span></span></code></pre></div><p>这样就获得了 <code>client-key.pem</code> 和 <code>client.pem</code>。</p>
+<p>命令执行后，你可能会看到提示‘[WARNING] This certificate lacks a &ldquo;hosts&rdquo; field&hellip;’，意思是因为没有指定 hosts，这个证书不适合用来标识服务器身份。但我们并不打算将它作为服务端证书使用，所以可以忽略这个警告。</p>
+<p>我们指定了 <code>CN=admin,O=system:masters</code>，相当于声明这个用户叫 admin，属于 <code>system:masters</code> 组。这对应 K8s 的一个预设规则：属于 <code>system:masters</code> 组的用户都是超级管理员。</p>
+<h3 id="生成-service-account-公私钥">
+  生成 Service Account 公私钥
+  <a class="anchor" href="#%e7%94%9f%e6%88%90-service-account-%e5%85%ac%e7%a7%81%e9%92%a5">#</a>
+</h3>
+<p>和前面的证书 / Key 不同，Service Account 证书是一对公私钥。</p>
+<p>有时候 Pod 也要和 Kubernetes 的 API 交互，因此在 Pod 创建的时候，Kubernetes 会为每个 Pod 创建一个 JWT Token 做为交互凭证，这个 Service Account 的公私钥就是用来生成和验证 JWT Token 的。</p>
+<p>这个比较简单，我们直接用 OpenSSL 生成。</p>
+<p>生成私钥和公钥</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># 生成私钥</span>
+</span></span><span style="display:flex;"><span>openssl genrsa -out sa-key.pem <span style="color:#ae81ff">2048</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 用私钥生成公钥</span>
+</span></span><span style="display:flex;"><span>openssl rsa -in sa-key.pem -pubout -out sa-pub.pem
+</span></span></code></pre></div><p>到这里为止，如果证书文件夹包含了下面这些文件，那基本说明这步安装完成。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#f92672">[</span>root@master pki<span style="color:#f92672">]</span><span style="color:#75715e"># ls -alh</span>
+</span></span><span style="display:flex;"><span>total 60K
+</span></span><span style="display:flex;"><span>drwxr-xr-x. <span style="color:#ae81ff">2</span> root root 4.0K Oct <span style="color:#ae81ff">13</span> 13:51 .
+</span></span><span style="display:flex;"><span>drwxr-xr-x. <span style="color:#ae81ff">3</span> root root   <span style="color:#ae81ff">17</span> Oct <span style="color:#ae81ff">13</span> 13:38 ..
+</span></span><span style="display:flex;"><span>-rw-r--r--. <span style="color:#ae81ff">1</span> root root <span style="color:#ae81ff">1009</span> Oct <span style="color:#ae81ff">13</span> 13:48 ca.csr
+</span></span><span style="display:flex;"><span>-rw-r--r--. <span style="color:#ae81ff">1</span> root root  <span style="color:#ae81ff">214</span> Oct <span style="color:#ae81ff">13</span> 13:48 ca-csr.json
+</span></span><span style="display:flex;"><span>-rw-------. <span style="color:#ae81ff">1</span> root root 1.7K Oct <span style="color:#ae81ff">13</span> 13:48 ca-key.pem
+</span></span><span style="display:flex;"><span>-rw-r--r--. <span style="color:#ae81ff">1</span> root root 1.3K Oct <span style="color:#ae81ff">13</span> 13:48 ca.pem
+</span></span><span style="display:flex;"><span>-rw-r--r--. <span style="color:#ae81ff">1</span> root root  <span style="color:#ae81ff">920</span> Oct <span style="color:#ae81ff">13</span> 13:51 client.csr
+</span></span><span style="display:flex;"><span>-rw-r--r--. <span style="color:#ae81ff">1</span> root root  <span style="color:#ae81ff">130</span> Oct <span style="color:#ae81ff">13</span> 13:51 client-csr.json
+</span></span><span style="display:flex;"><span>-rw-------. <span style="color:#ae81ff">1</span> root root 1.7K Oct <span style="color:#ae81ff">13</span> 13:51 client-key.pem
+</span></span><span style="display:flex;"><span>-rw-r--r--. <span style="color:#ae81ff">1</span> root root 1.3K Oct <span style="color:#ae81ff">13</span> 13:51 client.pem
+</span></span><span style="display:flex;"><span>-rw-r--r--. <span style="color:#ae81ff">1</span> root root 1.2K Oct <span style="color:#ae81ff">13</span> 13:50 kube-apiserver.csr
+</span></span><span style="display:flex;"><span>-rw-r--r--. <span style="color:#ae81ff">1</span> root root  <span style="color:#ae81ff">411</span> Oct <span style="color:#ae81ff">13</span> 13:49 kube-apiserver-csr.json
+</span></span><span style="display:flex;"><span>-rw-------. <span style="color:#ae81ff">1</span> root root 1.7K Oct <span style="color:#ae81ff">13</span> 13:50 kube-apiserver-key.pem
+</span></span><span style="display:flex;"><span>-rw-r--r--. <span style="color:#ae81ff">1</span> root root 1.6K Oct <span style="color:#ae81ff">13</span> 13:50 kube-apiserver.pem
+</span></span><span style="display:flex;"><span>-rw-------. <span style="color:#ae81ff">1</span> root root 1.7K Oct <span style="color:#ae81ff">13</span> 13:51 sa-key.pem
+</span></span><span style="display:flex;"><span>-rw-r--r--. <span style="color:#ae81ff">1</span> root root  <span style="color:#ae81ff">451</span> Oct <span style="color:#ae81ff">13</span> 13:51 sa-pub.pem
+</span></span></code></pre></div><p>接下来开始<a href="/cn/03-%e5%ae%89%e8%a3%85Master%e8%8a%82%e7%82%b9.md">安装 Master 节点</a>。</p>
+</article>
+ 
+      
+
+      <footer class="book-footer">
+        
+  <div class="flex flex-wrap justify-between">
+
+
+
+
+
+</div>
+
+
+
+  <script>(function(){function e(e){const t=window.getSelection(),n=document.createRange();n.selectNodeContents(e),t.removeAllRanges(),t.addRange(n)}document.querySelectorAll("pre code").forEach(t=>{t.addEventListener("click",function(){if(window.getSelection().toString())return;e(t.parentElement),navigator.clipboard&&navigator.clipboard.writeText(t.parentElement.textContent)})})})()</script>
+
+
+ 
+        
+      </footer>
+
+      
+  
+  <div class="book-comments">
+
+</div>
+  
+ 
+
+      <label for="menu-control" class="hidden book-menu-overlay"></label>
+    </div>
+
+    
+  </main>
+
+  
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
