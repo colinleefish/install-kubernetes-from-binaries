@@ -23,3 +23,7 @@ theme = 'hugo-book'
   languageName = 'Chinese'
   contentDir = 'content.zh'
   weight = 2
+
+[params]
+
+BookSection = '*'
