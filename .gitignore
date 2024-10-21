@@ -3,5 +3,4 @@ node_modules
 dist
 tmp
 resources/_gen/
-public/
-
+public/*

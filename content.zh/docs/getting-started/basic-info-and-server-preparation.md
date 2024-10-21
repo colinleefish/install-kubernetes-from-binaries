@@ -4,16 +4,16 @@ weight: 11
 bookToc: false
 ---
 
-## 一、基本信息和服务器准备
+# 一、基本信息和服务器准备
 
-这部分记录了服务器准备信息。
+这节记录了服务器准备阶段要做的事情。
 
-### 基本信息
+## 基本信息
 
 需要的准备内容：
 
-1. 3 台能上网的 Linux 服务器，这次我用的是 Rocky Linux 8
-2. 3 个同网段的 IP，挂在这 3 台服务器上
+- 3 台 Linux 服务器，我们这里使用了 Rocky Linux 8
+- 3 个同网段的 IP，挂在这 3 台服务器上
 
 计划表如下：
 
@@ -33,10 +33,38 @@ bookToc: false
 ```bash
 hostnamectl set-hostname (master|node01|node01)
 ```
+{{% tabs %}}
+
+{{% tab "master" %}}
+
+```bash
+hostnamectl set-hostname master
+```
+
+{{% /tab %}}
+
+{{% tab "node01" %}}
+
+
+```bash
+hostnamectl set-hostname node01
+```
+
+{{% /tab %}}
+
+{{% tab "node02" %}}
+```bash
+hostnamectl set-hostname node02
+```
+{{% /tab %}}
+
+{{% /tabs %}}
 
 把这三个 hostname 都写在 /etc/hosts 里面
 
-```/etc/hosts
+```
+# /etc/hosts
+
 192.168.56.10 master
 192.168.56.11 node01
 192.168.56.12 node02
@@ -69,11 +97,13 @@ dnf install socat conntrack ipset
 关闭 swap 和 selinux
 
 ```bash
+# 三台都要执行
+
 vim /etc/fstab
 vim /etc/selinux/config
 ```
 
-允许 ip_forward（这样的话 Node 节点才知道要把数据包转发给 Pod）
+允许 `ip_forward`（这样的话 Node 节点才知道要把数据包转发给 Pod）
 
 编辑 `/etc/sysctl.conf`，添加下面这句话
 
